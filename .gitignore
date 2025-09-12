@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.pyo
+build/
+*.egg
+.env
+AI/
+.vscode
+app/
+chroma_db/

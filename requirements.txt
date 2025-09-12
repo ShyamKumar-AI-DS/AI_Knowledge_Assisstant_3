@@ -1,0 +1,14 @@
+streamlit
+python-dotenv
+arxiv
+wikipedia
+langchain
+langchain-community
+langchain-groq
+faiss-cpu
+huggingface-hub
+sentence-transformers
+autogen
+pypdf
+ag2[openai]
+os
