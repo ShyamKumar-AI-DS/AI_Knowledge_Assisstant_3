@@ -10,5 +10,3 @@ huggingface-hub
 sentence-transformers
 autogen
 pypdf
-ag2[openai]
-os
