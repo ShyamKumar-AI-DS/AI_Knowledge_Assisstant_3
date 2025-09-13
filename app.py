@@ -248,8 +248,8 @@ with st.sidebar:
     - Generative AI and Key Achievements
     """)
 
-    pdf_path = "../resources/SAR.pdf"
-    pdf_path1 = "../resources/Generative AI Survey.pdf"
+    pdf_path = "./resources/Synthetic Aperture Radar.pdf"
+    pdf_path1 = "./resources/Generative AI Survey.pdf"
 
     try:
         with open(pdf_path, "rb") as file:
