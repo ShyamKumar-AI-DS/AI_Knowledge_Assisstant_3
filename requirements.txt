@@ -1,8 +1,8 @@
+langchain
 streamlit
 python-dotenv
 arxiv
 wikipedia
-langchain
 langchain-community
 langchain-groq
 faiss-cpu
