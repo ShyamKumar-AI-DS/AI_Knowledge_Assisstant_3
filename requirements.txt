@@ -10,3 +10,4 @@ huggingface-hub
 sentence-transformers
 autogen
 pypdf
+langchain_text_splitters
