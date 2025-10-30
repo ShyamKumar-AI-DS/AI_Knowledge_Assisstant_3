@@ -16,14 +16,14 @@ from dotenv import load_dotenv
 # LangChain
 from langchain_groq import ChatGroq     
 from langchain_community.document_loaders import PyPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain.chains import LLMChain
+from langchain.chains.llm import LLMChain
 from langchain.chains.retrieval import create_retrieval_chain
 from langchain.prompts import PromptTemplate
 from langchain.docstore.document import Document
-
+from langchain_core.output_parsers import StrOutputParser
 # -------------------------
 # Load LLM (Groq-based)
 # -------------------------
@@ -96,23 +96,53 @@ def add_external_results_to_faiss(external_texts, embedding_model="sentence-tran
 # -------------------------
 # Groq-native Summarizer & Explainer
 # -------------------------
+# def summarize_with_groq(docs_text):
+#     prompt = PromptTemplate.from_template(
+#         "Summarize the following documents into 5-6 concise bullet points:\n\n{docs}"
+#     )
+#     llm = get_llm()
+#     chain = LLMChain(llm=llm, prompt=prompt)
+#     return chain.run(docs=docs_text)
+
+# def explain_with_groq(docs_text, question):
+#     prompt = PromptTemplate.from_template(
+#         "Explain the following context to a beginner, step by step, and then answer the question. "
+#         "End with a one-sentence summary.\n\nContext:\n{docs}\n\nQuestion: {question}"
+#     )
+#     llm = get_llm()
+#     chain = LLMChain(llm=llm, prompt=prompt)
+#     return chain.run(docs=docs_text, question=question)
 def summarize_with_groq(docs_text):
-    prompt = PromptTemplate.from_template(
+    # Changed from PromptTemplate to the more modern ChatPromptTemplate
+    prompt = ChatPromptTemplate.from_template(
         "Summarize the following documents into 5-6 concise bullet points:\n\n{docs}"
     )
     llm = get_llm()
-    chain = LLMChain(llm=llm, prompt=prompt)
-    return chain.run(docs=docs_text)
+    
+    # New: Add an output parser to get a string response
+    output_parser = StrOutputParser()
+    
+    # Chained the components together using the pipe operator
+    # This replaces LLMChain
+    chain = prompt | llm | output_parser
+    
+    # Changed .run(docs=...) to .invoke({"docs": ...})
+    return chain.invoke({"docs": docs_text})
 
 def explain_with_groq(docs_text, question):
-    prompt = PromptTemplate.from_template(
+    # Changed from PromptTemplate
+    prompt = ChatPromptTemplate.from_template(
         "Explain the following context to a beginner, step by step, and then answer the question. "
         "End with a one-sentence summary.\n\nContext:\n{docs}\n\nQuestion: {question}"
     )
     llm = get_llm()
-    chain = LLMChain(llm=llm, prompt=prompt)
-    return chain.run(docs=docs_text, question=question)
-
+    output_parser = StrOutputParser()
+    
+    # Chained the components
+    chain = prompt | llm | output_parser
+    
+    # Changed .run(...) to .invoke({...})
+    return chain.invoke({"docs": docs_text, "question": question})
 # -------------------------
 # Orchestration (replaces AutoGen router)
 # -------------------------
