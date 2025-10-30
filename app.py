@@ -19,7 +19,7 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain.chains import RetrievalQA, LLMChain
+from langchain.chains import create_retrieval_chain, LLMChain
 from langchain.prompts import PromptTemplate
 from langchain.docstore.document import Document
 
@@ -148,7 +148,7 @@ def build_retrieval_qa(embedding_model="sentence-transformers/all-MiniLM-L6-v2",
         raise ValueError("No FAISS index found. Upload PDFs first.")
     db = st.session_state['faiss_db']
     retriever = db.as_retriever(search_kwargs={"k": k})
-    qa_chain = RetrievalQA.from_chain_type(llm=get_llm(), retriever=retriever, return_source_documents=True)
+    qa_chain = create_retrieval_chain.from_chain_type(llm=get_llm(), retriever=retriever, return_source_documents=True)
     return qa_chain, retriever
 
 # -------------------------
