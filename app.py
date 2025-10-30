@@ -14,12 +14,13 @@ import wikipedia
 from dotenv import load_dotenv
 
 # LangChain
-from langchain_groq import ChatGroq
+from langchain_groq import ChatGroq     
 from langchain_community.document_loaders import PyPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain.chains import create_retrieval_chain, LLMChain
+from langchain.chains.llm import LLMChain
+from langchain.chains.retrieval import create_retrieval_chain
 from langchain.prompts import PromptTemplate
 from langchain.docstore.document import Document
 
@@ -143,13 +144,42 @@ def run_agents(question, retriever, qa_chain):
 # -------------------------
 # Retrieval QA
 # -------------------------
-def build_retrieval_qa(embedding_model="sentence-transformers/all-MiniLM-L6-v2", k=3):
+import streamlit as st
+from langchain_core.prompts import ChatPromptTemplate
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains import create_retrieval_chain
+
+# Assuming you have a function to get your LLM instance
+# from your_llm_module import get_llm 
+
+def build_retrieval_qa(llm, k=3):
     if 'faiss_db' not in st.session_state:
-        raise ValueError("No FAISS index found. Upload PDFs first.")
+        raise ValueError("No FAISS index found. Please upload PDF documents first.")
     db = st.session_state['faiss_db']
     retriever = db.as_retriever(search_kwargs={"k": k})
-    qa_chain = create_retrieval_chain.from_chain_type(llm=get_llm(), retriever=retriever, return_source_documents=True)
-    return qa_chain, retriever
+    prompt_template = """Answer the user's question based only on the following context:
+
+    <context>
+    {context}
+    </context>
+
+    Question: {input}
+    """
+    prompt = ChatPromptTemplate.from_template(prompt_template)
+
+    document_chain = create_stuff_documents_chain(llm, prompt)
+
+    retrieval_chain = create_retrieval_chain(retriever, document_chain)
+
+    return retrieval_chain, retriever
+
+# def build_retrieval_qa(embedding_model="sentence-transformers/all-MiniLM-L6-v2", k=3):
+#     if 'faiss_db' not in st.session_state:
+#         raise ValueError("No FAISS index found. Upload PDFs first.")
+#     db = st.session_state['faiss_db']
+#     retriever = db.as_retriever(search_kwargs={"k": k})
+#     qa_chain = create_retrieval_chain.from_chain_type(llm=get_llm(), retriever=retriever, return_source_documents=True)
+#     return qa_chain, retriever
 
 # -------------------------
 # UI
