@@ -6,7 +6,7 @@ AI Knowledge Assistant (RAG + Groq-native Summarizer/Explainer)
 - No AutoGen, no OpenAI dependency
 """
 
-import os,cgi
+import os
 import tempfile
 import streamlit as st
 import arxiv
@@ -221,10 +221,6 @@ def inject_custom_css():
     """, unsafe_allow_html=True)
 
 def main():
-    st.set_page_config(page_title="AI Knowledge Assistant", layout="wide")
-    inject_custom_css()
-    st.title("🤖 AI Knowledge Assistant (RAG + AutoGen Agents)")
-
     uploaded = st.file_uploader("Upload PDF(s)", type=["pdf"], accept_multiple_files=True)
     if uploaded:
         for f in uploaded:
@@ -317,5 +313,10 @@ with st.sidebar:
     st.markdown("---")
     st.caption("Upload research papers → ask questions → get AI-powered insights")
     st.caption("Developed By Shyam Kumar")
+
+
 if __name__ == "__main__":
+    st.set_page_config(page_title="AI Knowledge Assistant", layout="wide")
+    inject_custom_css()
+    st.title("🤖 AI Knowledge Assistant (RAG + AutoGen Agents)")
     main()
