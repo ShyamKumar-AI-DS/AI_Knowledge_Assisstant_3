@@ -120,7 +120,7 @@ def add_external_results_to_faiss(external_texts, embedding_model="sentence-tran
 
 def summarize_with_groq(docs_text):
     prompt = ChatPromptTemplate.from_template(
-        "Summarize the following documents intovconcise bullet points:\n\n{docs}." \
+        "Summarize the following documents into concise bullet points:\n\n{docs}." \
         "No preambles" \
         "Only the summarized Text, Display it in bold fonts:\n\n{docs}"
     )   
