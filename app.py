@@ -119,36 +119,21 @@ def add_external_results_to_faiss(external_texts, embedding_model="sentence-tran
 #     return chain.run(docs=docs_text, question=question)
 
 def summarize_with_groq(docs_text):
-    template = """ Summarize the following documents into 5-6 concise bullet points.
-        Instructions:
-        - Do not include any preambles or introductory text ("No preambles").
-        - Output only the final list of summarized bullet points ("Only the summarized Text").
-        - Format each bullet point to be bold using Markdown (e.g., **Your bullet point here**).
-        Documents:
-        {docs}
-    """
-    prompt = ChatPromptTemplate.from_template(template)
+    prompt = ChatPromptTemplate.from_template(
+        "Summarize the following documents into 5-6 concise bullet points:\n\n{docs}." \
+        "No preambles" \
+        "Only the summarized Text, Display it in bold fonts:\n\n{docs}"
+    )   
     llm = get_llm()
     output_parser = StrOutputParser()
     chain = prompt | llm | output_parser
     return chain.invoke({"docs": docs_text})
 
 def explain_with_groq(docs_text, question):
-    template = """
-        **Role:** You are an expert teacher skilled at explaining complex topics to a complete beginner.
-        **Task:** You have two goals:
-        1.  First, explain the provided 'Context' in simple, step-by-step terms. Assume the user knows nothing about the topic. Avoid jargon.
-        2.  Second, after your explanation, clearly answer the user's 'Question' based on the context.
-        **Final Instruction:** Conclude your entire response with a single, one-sentence summary of the answer to the question.
-        ---
-        **Context:**
-        {docs}
-        ---
-        **Question:**
-        {question}
-    """
-    
-    prompt = ChatPromptTemplate.from_template(template)
+    prompt = ChatPromptTemplate.from_template(
+        "Explain the following context to a beginner, step by step, and then answer the question.\n\nContext:\n{docs}\n\nQuestion: {question}" \
+        "End with a one-sentence summary.\n\nContext:\n{docs}\n\nQuestion: {question}"
+    )
     llm = get_llm()
     output_parser = StrOutputParser()
     chain = prompt | llm | output_parser
