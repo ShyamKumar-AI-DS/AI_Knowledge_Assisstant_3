@@ -122,7 +122,7 @@ def summarize_with_groq(docs_text):
     prompt = ChatPromptTemplate.from_template(
         "Summarize the following documents into 5-6 concise bullet points:\n\n{docs}." \
         "No preambles" \
-        "Only the summarized Text"
+        "Only the summarized Text, and Display in bold fonts"
     )
     llm = get_llm()
     output_parser = StrOutputParser()
@@ -131,8 +131,8 @@ def summarize_with_groq(docs_text):
 
 def explain_with_groq(docs_text, question):
     prompt = ChatPromptTemplate.from_template(
-        "Explain the following context to a beginner, step by step, and then answer the question. "
-        "End with a one-sentence summary.\n\nContext:\n{docs}\n\nQuestion: {question}"
+        "Explain the following context to a beginner, step by step, and then answer the question.\n\nContext:\n{docs}\n\nQuestion: {question}"
+        "End with a one-sentence summary.\n\nContext:\n{docs}\n\nQuestion: {question"
     )
     llm = get_llm()
     output_parser = StrOutputParser()
