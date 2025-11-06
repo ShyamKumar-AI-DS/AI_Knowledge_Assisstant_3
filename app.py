@@ -122,7 +122,7 @@ def summarize_with_groq(docs_text):
     prompt = ChatPromptTemplate.from_template(
         "Summarize the following documents into 5-6 concise bullet points:\n\n{docs}." \
         "No preambles" \
-        "Only the summarized Text, and Display in bold fonts"
+        "Only the summarized Text, and Display in bold fonts:\n\n{docs}"
     )
     llm = get_llm()
     output_parser = StrOutputParser()
