@@ -19,11 +19,12 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-# from langchain.chains.llm import LLMChain
-from langchain.chains.retrieval import create_retrieval_chain
 from langchain.prompts import PromptTemplate
 from langchain.docstore.document import Document
 from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+
+
 # -------------------------
 # Load LLM (Groq-based)
 # -------------------------
@@ -93,9 +94,13 @@ def add_external_results_to_faiss(external_texts, embedding_model="sentence-tran
         st.session_state['faiss_db'] = FAISS.from_documents(docs, hf_embeddings)
     return st.session_state['faiss_db']
 
+
+
 # -------------------------
 # Groq-native Summarizer & Explainer
 # -------------------------
+
+
 # def summarize_with_groq(docs_text):
 #     prompt = PromptTemplate.from_template(
 #         "Summarize the following documents into 5-6 concise bullet points:\n\n{docs}"
@@ -112,40 +117,34 @@ def add_external_results_to_faiss(external_texts, embedding_model="sentence-tran
 #     llm = get_llm()
 #     chain = LLMChain(llm=llm, prompt=prompt)
 #     return chain.run(docs=docs_text, question=question)
+
 def summarize_with_groq(docs_text):
-    # Changed from PromptTemplate to the more modern ChatPromptTemplate
     prompt = ChatPromptTemplate.from_template(
-        "Summarize the following documents into 5-6 concise bullet points:\n\n{docs}"
+        "Summarize the following documents into 5-6 concise bullet points:\n\n{docs}." \
+        "No preambles" \
+        "Only the summarized Text"
     )
     llm = get_llm()
-    
-    # New: Add an output parser to get a string response
     output_parser = StrOutputParser()
-    
-    # Chained the components together using the pipe operator
-    # This replaces LLMChain
     chain = prompt | llm | output_parser
-    
-    # Changed .run(docs=...) to .invoke({"docs": ...})
     return chain.invoke({"docs": docs_text})
 
 def explain_with_groq(docs_text, question):
-    # Changed from PromptTemplate
     prompt = ChatPromptTemplate.from_template(
         "Explain the following context to a beginner, step by step, and then answer the question. "
         "End with a one-sentence summary.\n\nContext:\n{docs}\n\nQuestion: {question}"
     )
     llm = get_llm()
     output_parser = StrOutputParser()
-    
-    # Chained the components
     chain = prompt | llm | output_parser
-    
-    # Changed .run(...) to .invoke({...})
     return chain.invoke({"docs": docs_text, "question": question})
+
+
 # -------------------------
 # Orchestration (replaces AutoGen router)
 # -------------------------
+
+
 def run_agents(question, retriever, qa_chain):
     docs = retriever.get_relevant_documents(question) or []
     doc_texts = [getattr(d, "page_content", str(d)) for d in docs[:6]]
@@ -154,6 +153,7 @@ def run_agents(question, retriever, qa_chain):
     try:
         summary_text = summarize_with_groq(documents_joined)
         explanation_text = explain_with_groq(documents_joined, question)
+
     except Exception as e:
         summary_text, explanation_text = f"Groq failed: {e}", f"Groq failed: {e}"
 
@@ -161,6 +161,7 @@ def run_agents(question, retriever, qa_chain):
         qa_result = qa_chain.invoke({"query": question})
         concise_answer = qa_result.get("result", "")
         source_docs = qa_result.get("source_documents", [])
+
     except Exception:
         concise_answer, source_docs = "", docs
 
@@ -174,42 +175,14 @@ def run_agents(question, retriever, qa_chain):
 # -------------------------
 # Retrieval QA
 # -------------------------
-import streamlit as st
-from langchain_core.prompts import ChatPromptTemplate
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain.chains import create_retrieval_chain
 
-# Assuming you have a function to get your LLM instance
-# from your_llm_module import get_llm 
-
-def build_retrieval_qa(llm, k=3):
+def build_retrieval_qa(k=3):
     if 'faiss_db' not in st.session_state:
-        raise ValueError("No FAISS index found. Please upload PDF documents first.")
+        raise ValueError("No FAISS index found. Upload PDFs first.")
     db = st.session_state['faiss_db']
     retriever = db.as_retriever(search_kwargs={"k": k})
-    prompt_template = """Answer the user's question based only on the following context:
-
-    <context>
-    {context}
-    </context>
-
-    Question: {input}
-    """
-    prompt = ChatPromptTemplate.from_template(prompt_template)
-
-    document_chain = create_stuff_documents_chain(llm, prompt)
-
-    retrieval_chain = create_retrieval_chain(retriever, document_chain)
-
-    return retrieval_chain, retriever
-
-# def build_retrieval_qa(embedding_model="sentence-transformers/all-MiniLM-L6-v2", k=3):
-#     if 'faiss_db' not in st.session_state:
-#         raise ValueError("No FAISS index found. Upload PDFs first.")
-#     db = st.session_state['faiss_db']
-#     retriever = db.as_retriever(search_kwargs={"k": k})
-#     qa_chain = create_retrieval_chain.from_chain_type(llm=get_llm(), retriever=retriever, return_source_documents=True)
-#     return qa_chain, retriever
+    qa_chain = get_llm | retriever
+    return qa_chain, retriever
 
 # -------------------------
 # UI
@@ -275,8 +248,8 @@ def main():
             # call the autogen-based router
             result = run_agents(question, retriever, qa_chain)
 
-        st.subheader("📌 Answer")
-        st.markdown(f"<div class='result-box'>{result['concise_answer']}</div>", unsafe_allow_html=True)
+        # st.subheader("📌 Answer")
+        # st.markdown(f"<div class='result-box'>{result['concise_answer']}</div>", unsafe_allow_html=True)
 
         st.subheader("📝 Explanation")
         st.markdown(f"<div class='result-box'>{result['explanation']}</div>", unsafe_allow_html=True)
@@ -294,6 +267,7 @@ def main():
             wiki = st.session_state["external"].get("wiki", {})
             if wiki:
                 st.markdown(f"- **Wikipedia:** [{wiki['title']}]({wiki['url']}) — {wiki['summary']}")
+
 with st.sidebar:
     st.subheader("📘 AI Knowledge Assistant")
     st.info("""
