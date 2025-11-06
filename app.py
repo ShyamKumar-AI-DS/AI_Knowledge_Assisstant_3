@@ -103,7 +103,7 @@ def add_external_results_to_faiss(external_texts, embedding_model="sentence-tran
 
 # def summarize_with_groq(docs_text):
 #     prompt = PromptTemplate.from_template(
-#         "Summarize the following documents into 5-6 concise bullet points:\n\n{docs}"
+#         "Summarize and display the following documents into concise bullet points:\n\n{docs}"
 #     )
 #     llm = get_llm()
 #     chain = LLMChain(llm=llm, prompt=prompt)
