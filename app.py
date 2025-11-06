@@ -23,6 +23,7 @@ from langchain.docstore.document import Document
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 
+st.set_page_config(page_title="AI Knowledge Assistant", layout="wide")
 
 # -------------------------
 # Load LLM (Groq-based)
@@ -318,5 +319,4 @@ with st.sidebar:
 
 
 if __name__ == "__main__":
-    st.set_page_config(page_title="AI Knowledge Assistant", layout="wide")
     main()
