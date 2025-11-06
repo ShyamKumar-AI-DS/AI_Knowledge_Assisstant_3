@@ -11,4 +11,4 @@ sentence-transformers==3.0.1
 pyautogen==0.2.25
 pypdf==4.2.0
 langchain-text-splitters==0.2.0
-python-version=3.11
+python-version==3.11
