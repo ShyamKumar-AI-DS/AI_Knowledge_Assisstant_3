@@ -221,6 +221,8 @@ def inject_custom_css():
     """, unsafe_allow_html=True)
 
 def main():
+    inject_custom_css()
+    st.title("🤖 AI Knowledge Assistant (RAG + AutoGen Agents)")
     uploaded = st.file_uploader("Upload PDF(s)", type=["pdf"], accept_multiple_files=True)
     if uploaded:
         for f in uploaded:
@@ -316,7 +318,5 @@ with st.sidebar:
 
 
 if __name__ == "__main__":
-    st.set_page_config(page_title="AI Knowledge Assistant", layout="wide")
-    inject_custom_css()
-    st.title("🤖 AI Knowledge Assistant (RAG + AutoGen Agents)")
+    # st.set_page_config(page_title="AI Knowledge Assistant", layout="wide")
     main()
