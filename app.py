@@ -318,5 +318,5 @@ with st.sidebar:
 
 
 if __name__ == "__main__":
-    # st.set_page_config(page_title="AI Knowledge Assistant", layout="wide")
+    st.set_page_config(page_title="AI Knowledge Assistant", layout="wide")
     main()
