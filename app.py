@@ -132,7 +132,7 @@ def summarize_with_groq(docs_text):
 def explain_with_groq(docs_text, question):
     prompt = ChatPromptTemplate.from_template(
         "Explain the following context to a beginner, step by step, and then answer the question.\n\nContext:\n{docs}\n\nQuestion: {question}"
-        "End with a one-sentence summary.\n\nContext:\n{docs}\n\nQuestion: {question"
+        "End with a one-sentence summary.\n\nContext:\n{docs}\n\nQuestion: {question}"
     )
     llm = get_llm()
     output_parser = StrOutputParser()
