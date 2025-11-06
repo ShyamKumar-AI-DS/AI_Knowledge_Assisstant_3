@@ -1,3 +1,4 @@
+python-version==3.11
 streamlit==1.35.0
 python-dotenv==1.0.1
 arxiv==2.1.0
@@ -11,4 +12,3 @@ sentence-transformers==3.0.1
 pyautogen==0.2.25
 pypdf==4.2.0
 langchain-text-splitters==0.2.0
-python-version==3.11
