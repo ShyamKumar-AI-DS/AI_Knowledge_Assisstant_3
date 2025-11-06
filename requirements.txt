@@ -1,5 +1,5 @@
 python-version==3.11
-streamlit==1.35.0
+streamlit==1.25.0
 python-dotenv==1.0.1
 arxiv==2.1.0
 wikipedia==1.4.0
