@@ -6,7 +6,7 @@ AI Knowledge Assistant (RAG + Groq-native Summarizer/Explainer)
 - No AutoGen, no OpenAI dependency
 """
 
-import os
+import os,cgi
 import tempfile
 import streamlit as st
 import arxiv
