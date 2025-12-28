@@ -103,7 +103,7 @@ def add_external_results_to_faiss(external_texts, embedding_model="sentence-tran
 
 # def summarize_with_groq(docs_text):
 #     prompt = PromptTemplate.from_template(
-#         "Summarize and display the following documents into concise bullet points:\n\n{docs}"
+#         "Summarize the following documents into 5-6 concise bullet points:\n\n{docs}"
 #     )
 #     llm = get_llm()
 #     chain = LLMChain(llm=llm, prompt=prompt)
@@ -120,7 +120,7 @@ def add_external_results_to_faiss(external_texts, embedding_model="sentence-tran
 
 def summarize_with_groq(docs_text):
     prompt = ChatPromptTemplate.from_template(
-        "Summarize the following documents into concise bullet points:\n\n{docs}." \
+        "Summarize the following documents into 5-6 concise bullet points:\n\n{docs}." \
         "No preambles" \
         "Only the summarized Text, Display it in bold fonts:\n\n{docs}"
     )   
@@ -131,7 +131,7 @@ def summarize_with_groq(docs_text):
 
 def explain_with_groq(docs_text, question):
     prompt = ChatPromptTemplate.from_template(
-        "Explain the following context to a beginner, step by step, and then answer the question.\n\nContext:\n{docs}\n\nQuestion: {question}" \
+        "Explain the following context step by step, and then answer the question.\n\nContext:\n{docs}\n\nQuestion: {question}" \
         "End with a one-sentence summary.\n\nContext:\n{docs}\n\nQuestion: {question}"
     )
     llm = get_llm()
@@ -257,7 +257,7 @@ def main():
 
         st.subheader("📚 Sources")
         for d in result["source_documents"][:5]:
-            st.markdown(f"<div class='result-box'>{getattr(d,'page_content','')[:300]}...</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='result-box'>{getattr(d,'page_content','')[:100]}...</div>", unsafe_allow_html=True)
 
         if "external" in st.session_state:
             for a in st.session_state["external"].get("arxiv", []):
@@ -311,7 +311,7 @@ with st.sidebar:
     st.markdown("- Hugging Face Embeddings")
     st.markdown("- arXiv + Wikipedia APIs")
     st.markdown("- AutoGen Multi-Agent Framework")
-    st.markdown("- FAISS")
+    st.markdown("- FAISS DB")
 
     st.markdown("---")
     st.caption("Upload research papers → ask questions → get AI-powered insights")
