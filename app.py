@@ -33,10 +33,13 @@ load_dotenv()
 @st.cache_resource
 def get_llm():
     return ChatGroq(
-        model="openai/gpt-oss-120b",
-        temperature=0.3,
-        max_tokens=1500,
-        groq_api_key=os.getenv("GROQ_API_KEY")
+        model_name="openai/gpt-oss-120b", # Or your preferred Groq model
+        temperature=0.1,      # Lower temperature (0.0 - 0.2) minimizes hallucinations
+        max_tokens=None,      # Let the model decide the length based on prompt
+        timeout=None,
+        max_retries=2,
+        groq_api_key=os.getenv("GROQ_API_KEY"),
+        # top_p=0.9           # Optional: Nucleus sampling to keep results focused
     )
 
 # -------------------------
@@ -120,23 +123,34 @@ def add_external_results_to_faiss(external_texts, embedding_model="sentence-tran
 
 def summarize_with_groq(docs_text):
     prompt = ChatPromptTemplate.from_template(
-        "Summarize the following documents into 5-6 concise bullet points:\n\n{docs}." \
-        "No preambles" \
-        "Only the summarized Text, Display it in bold fonts:\n\n{docs}"
+        "SYSTEM: You are a precise document parser. Your goal is to extract key insights without hallucinating details not present in the source.\n\n"
+        "USER: Summarize the following context into 5-6 distinct bullet points. \n"
+        "RULES:\n"
+        "- Each bullet point MUST be on a new line.\n"
+        "- Each bullet point MUST be entirely in **bold**.\n"
+        "- Do not include any introductory text or closing remarks.\n\n"
+        "CONTEXT: {docs}\n\n"
+        "ASSISTANT:"
     )   
     llm = get_llm()
-    output_parser = StrOutputParser()
-    chain = prompt | llm | output_parser
+    chain = prompt | llm | StrOutputParser()
     return chain.invoke({"docs": docs_text})
 
 def explain_with_groq(docs_text, question):
     prompt = ChatPromptTemplate.from_template(
-        "Explain the following context step by step, and then answer the question.\n\nContext:\n{docs}\n\nQuestion: {question}" \
-        "End with a one-sentence summary.\n\nContext:\n{docs}\n\nQuestion: {question}"
+        "SYSTEM: You are an expert analyst. Answer the question based ONLY on the provided context. "
+        "If the answer is not contained within the context, state that you do not have enough information.\n\n"
+        "USER:\n"
+        "CONTEXT:\n{docs}\n\n"
+        "QUESTION: {question}\n\n"
+        "INSTRUCTIONS:\n"
+        "1. Provide a step-by-step logical explanation.\n"
+        "2. Directly answer the question based on those steps.\n"
+        "3. Conclude with a single-sentence summary.\n\n"
+        "ASSISTANT:"
     )
     llm = get_llm()
-    output_parser = StrOutputParser()
-    chain = prompt | llm | output_parser
+    chain = prompt | llm | StrOutputParser()
     return chain.invoke({"docs": docs_text, "question": question})
 
 
