@@ -5,6 +5,7 @@ wikipedia==1.4.0
 langchain==0.2.1
 langchain-community==0.2.1
 langchain-groq==0.1.5
+<<<<<<< HEAD
 faiss-cpu==1.8.0
 huggingface-hub==0.23.2
 sentence-transformers==2.7.0
@@ -12,3 +13,11 @@ pyautogen==0.2.25
 pypdf==4.2.0
 langchain-text-splitters==0.2.0
 docx2txt==0.8
+=======
+faiss-cpu==1.12.0
+huggingface-hub==0.23.2
+sentence-transformers==3.0.1
+pyautogen==0.2.25
+pypdf==4.2.0
+langchain-text-splitters==0.2.0
+>>>>>>> 08188d06bd81b0b686b6c6524c7490282ce2f262

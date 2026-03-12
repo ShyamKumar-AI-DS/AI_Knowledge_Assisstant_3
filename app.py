@@ -15,9 +15,15 @@ from dotenv import load_dotenv
 
 # LangChain
 from langchain_groq import ChatGroq     
+<<<<<<< HEAD
 from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
+=======
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.embeddings import HuggingFaceEmbeddings
+>>>>>>> 08188d06bd81b0b686b6c6524c7490282ce2f262
 from langchain_community.vectorstores import FAISS
 from langchain.docstore.document import Document
 from langchain_core.output_parsers import StrOutputParser
@@ -114,6 +120,7 @@ def add_external_results_to_faiss(external_texts, embedding_model="sentence-tran
         st.session_state['faiss_db'] = FAISS.from_documents(docs, hf_embeddings)
     return st.session_state['faiss_db']
 
+<<<<<<< HEAD
 
 def get_faiss_documents(query: str, k: int = 1) -> str:
     """Retrieve top local FAISS document for a user query."""
@@ -141,11 +148,69 @@ def search_arxiv(query: str) -> str:
     """Gets relevant arxiv papers for a query."""
     return str(fetch_arxiv_papers(query))
 
+=======
+
+
+# -------------------------
+# Groq-native Summarizer & Explainer
+# -------------------------
+
+
+# def summarize_with_groq(docs_text):
+#     prompt = PromptTemplate.from_template(
+#         "Summarize the following documents into 5-6 concise bullet points:\n\n{docs}"
+#     )
+#     llm = get_llm()
+#     chain = LLMChain(llm=llm, prompt=prompt)
+#     return chain.run(docs=docs_text)
+
+# def explain_with_groq(docs_text, question):
+#     prompt = PromptTemplate.from_template(
+#         "Explain the following context to a beginner, step by step, and then answer the question. "
+#         "End with a one-sentence summary.\n\nContext:\n{docs}\n\nQuestion: {question}"
+#     )
+#     llm = get_llm()
+#     chain = LLMChain(llm=llm, prompt=prompt)
+#     return chain.run(docs=docs_text, question=question)
+
+def summarize_with_groq(docs_text):
+    prompt = ChatPromptTemplate.from_template(
+        "SYSTEM: You are a precise document parser. Your goal is to extract key insights without hallucinating details not present in the source.\n\n"
+        "USER: Summarize the following context into 5-6 distinct bullet points. \n"
+        "RULES:\n"
+        "- Each bullet point MUST be on a new line.\n"
+        "- Each bullet point MUST be entirely in **bold**.\n"
+        "- Do not include any introductory text or closing remarks.\n\n"
+        "CONTEXT: {docs}\n\n"
+        "ASSISTANT:"
+    )   
+    llm = get_llm()
+    chain = prompt | llm | StrOutputParser()
+    return chain.invoke({"docs": docs_text})
+
+def explain_with_groq(docs_text, question):
+    prompt = ChatPromptTemplate.from_template(
+        "SYSTEM: You are an expert analyst. Answer the question based ONLY on the provided context. "
+        "If the answer is not contained within the context, state that you do not have enough information.\n\n"
+        "USER:\n"
+        "CONTEXT:\n{docs}\n\n"
+        "QUESTION: {question}\n\n"
+        "INSTRUCTIONS:\n"
+        "1. Provide a step-by-step logical explanation.\n"
+        "2. Directly answer the question based on those steps.\n"
+        "3. Conclude with a single-sentence summary.\n\n"
+        "ASSISTANT:"
+    )
+    llm = get_llm()
+    chain = prompt | llm | StrOutputParser()
+    return chain.invoke({"docs": docs_text, "question": question})
+>>>>>>> 08188d06bd81b0b686b6c6524c7490282ce2f262
 
 
 # -------------------------
 # AutoGen Agent Orchestration
 # -------------------------
+<<<<<<< HEAD
 
 def run_autogen_agents(question, do_external=True):
     has_local_docs = 'faiss_db' in st.session_state
@@ -234,6 +299,48 @@ def run_autogen_agents(question, do_external=True):
 
     final_answer = chat_res.summary.replace("TERMINATE", "").strip() if chat_res.summary else "Agent failed to respond."
     return final_answer, external_sources
+=======
+
+
+def run_agents(question, retriever, qa_chain):
+    docs = retriever.get_relevant_documents(question) or []
+    doc_texts = [getattr(d, "page_content", str(d)) for d in docs[:6]]
+    documents_joined = "\n\n---\n\n".join(doc_texts)
+
+    try:
+        summary_text = summarize_with_groq(documents_joined)
+        explanation_text = explain_with_groq(documents_joined, question)
+
+    except Exception as e:
+        summary_text, explanation_text = f"Groq failed: {e}", f"Groq failed: {e}"
+
+    try:
+        qa_result = qa_chain.invoke({"query": question})
+        concise_answer = qa_result.get("result", "")
+        source_docs = qa_result.get("source_documents", [])
+
+    except Exception:
+        concise_answer, source_docs = "", docs
+
+    return {
+        "concise_answer": concise_answer,
+        "explanation": explanation_text,
+        "summary": summary_text,
+        "source_documents": source_docs
+    }
+
+# -------------------------
+# Retrieval QA
+# -------------------------
+
+def build_retrieval_qa(k=3):
+    if 'faiss_db' not in st.session_state:
+        raise ValueError("No FAISS index found. Upload PDFs first.")
+    db = st.session_state['faiss_db']
+    retriever = db.as_retriever(search_kwargs={"k": k})
+    qa_chain = get_llm | retriever
+    return qa_chain, retriever
+>>>>>>> 08188d06bd81b0b686b6c6524c7490282ce2f262
 
 # -------------------------
 # UI
@@ -274,8 +381,13 @@ def inject_custom_css():
 
 def main():
     inject_custom_css()
+<<<<<<< HEAD
     st.title("🤖 AI Knowledge Assistant (Autogen Agents)")
     uploaded = st.file_uploader("Upload Document(s) (PDF or DOCX)", type=["pdf", "docx"], accept_multiple_files=True)
+=======
+    st.title("🤖 AI Knowledge Assistant (RAG + AutoGen Agents)")
+    uploaded = st.file_uploader("Upload PDF(s)", type=["pdf"], accept_multiple_files=True)
+>>>>>>> 08188d06bd81b0b686b6c6524c7490282ce2f262
     if uploaded:
         for f in uploaded:
             ingest_document_to_faiss(f)
@@ -290,8 +402,13 @@ def main():
         with st.spinner("Analyzing and generating response with AutoGen..."):
             unified_answer, external_sources = run_autogen_agents(question, do_external=do_external)
 
+<<<<<<< HEAD
         st.subheader("💡 Knowledge Assistant AI Response")
         st.markdown(f"<div class='result-box'>{unified_answer}</div>", unsafe_allow_html=True)
+=======
+        # st.subheader("📌 Answer")
+        # st.markdown(f"<div class='result-box'>{result['concise_answer']}</div>", unsafe_allow_html=True)
+>>>>>>> 08188d06bd81b0b686b6c6524c7490282ce2f262
 
         # Display external source citation links
         if external_sources:
@@ -319,6 +436,20 @@ def main():
                 source_content = getattr(d, 'page_content', '')
                 st.markdown(f"**[Local Source {i+1}]**: <div class='result-box' style='font-size: 0.9em; border-left: 3px solid #ccc;'>{source_content}</div>", unsafe_allow_html=True)
 
+<<<<<<< HEAD
+=======
+        st.subheader("📚 Sources")
+        for d in result["source_documents"][:5]:
+            st.markdown(f"<div class='result-box'>{getattr(d,'page_content','')[:100]}...</div>", unsafe_allow_html=True)
+
+        if "external" in st.session_state:
+            for a in st.session_state["external"].get("arxiv", []):
+                st.markdown(f"- [{a['title']}]({a['pdf_url']})")
+            wiki = st.session_state["external"].get("wiki", {})
+            if wiki:
+                st.markdown(f"- **Wikipedia:** [{wiki['title']}]({wiki['url']}) — {wiki['summary']}")
+
+>>>>>>> 08188d06bd81b0b686b6c6524c7490282ce2f262
 with st.sidebar:
     st.subheader("📘 AI Knowledge Assistant")
     st.info("""
@@ -363,7 +494,12 @@ with st.sidebar:
     st.markdown("- Groq LLMs (OpenAI GPT OSS)")
     st.markdown("- Hugging Face Embeddings")
     st.markdown("- arXiv + Wikipedia APIs")
+<<<<<<< HEAD
     st.markdown("- FAISS DB + Langchain")
+=======
+    st.markdown("- AutoGen Multi-Agent Framework")
+    st.markdown("- FAISS DB")
+>>>>>>> 08188d06bd81b0b686b6c6524c7490282ce2f262
 
     st.markdown("---")
     st.caption("Upload research papers → ask questions → get AI-powered insights")

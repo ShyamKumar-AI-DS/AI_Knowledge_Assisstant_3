@@ -9,7 +9,7 @@ The app also integrates **external knowledge** from **arXiv** and **Wikipedia** 
 
 ### 📂 PDF Ingestion & Indexing
 - Upload research papers.  
-- Split, embed, and store with **Chroma Vector Store**.  
+- Split, embed, and store with **FAISS Vector Store**.  
 
 ### 🔍 Retrieval-Augmented QA
 - Search within ingested papers using **Hugging Face embeddings**.  
@@ -35,7 +35,7 @@ The app also integrates **external knowledge** from **arXiv** and **Wikipedia** 
 ---
 
 ### Document Processing
-- PDFs → split into chunks → embeddings → stored in **Chroma**.  
+- PDFs → split into chunks → embeddings → stored in **FAISS DB**.  
 
 ### CrewAI Agents
 - **Summarizer Agent**: distills document content.  
@@ -43,7 +43,7 @@ The app also integrates **external knowledge** from **arXiv** and **Wikipedia** 
 - Sequential workflow orchestrated by **CrewAI**.  
 
 ### Knowledge Retrieval
-- RAG pipeline with **Groq LLM** + **Chroma retriever**.  
+- RAG pipeline with **Groq LLM** + **FAISS retriever**.  
 - Optional external context from **arXiv & Wikipedia**.  
 
 ### UI
