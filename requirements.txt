@@ -5,8 +5,11 @@ wikipedia==1.4.0
 langchain==0.2.1
 langchain-community==0.2.1
 langchain-groq==0.1.5
+<<<<<<< HEAD
 langchain-text-splitters==0.2.0
 langchain-huggingface==0.0.3
+=======
+>>>>>>> 210e099af1d643af2b351730aaf3c33e15a8703b
 faiss-cpu==1.8.0
 huggingface-hub==0.23.2
 sentence-transformers==2.7.0
