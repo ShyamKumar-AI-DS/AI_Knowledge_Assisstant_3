@@ -1,7 +1,7 @@
 # 🤖 AI Knowledge Assistant ( RAG + AutoGen Agents )
 
-An interactive **AI-powered research assistant** built with **Streamlit**, **AutoGen multi-agent orchestration**, and **Retrieval-Augmented Generation (RAG)**.  
-Upload research papers (PDF/DOCX), ask questions, and get **cited, concise answers** backed by local documents and live external sources from **arXiv** and **Wikipedia**.
+- An interactive **AI-powered research assistant** built with **Streamlit**, **AutoGen multi-agent orchestration**, and **Retrieval-Augmented Generation (RAG)**.  
+- Upload research papers (PDF/DOCX), ask questions, and get **cited, concise answers** backed by local documents and live external sources from **arXiv** and **Wikipedia**.
 
 ---
 
