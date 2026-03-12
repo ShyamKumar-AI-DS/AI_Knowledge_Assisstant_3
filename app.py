@@ -61,7 +61,7 @@ def ingest_document_to_faiss(uploaded_file, embedding_model="sentence-transforme
     docs = text_splitter.split_documents(raw_docs)
     hf_embeddings = HuggingFaceEmbeddings(
         model_name=embedding_model,
-        model_kwargs={'device': 'cuda'},
+        model_kwargs={'device': 'cpu'},
     )
 
     if 'faiss_db' in st.session_state:
@@ -100,7 +100,7 @@ def fetch_wikipedia_summary(topic, sentences=2):
 def add_external_results_to_faiss(external_texts, embedding_model="sentence-transformers/all-MiniLM-L6-v2"):
     hf_embeddings = HuggingFaceEmbeddings(
         model_name=embedding_model,
-        model_kwargs={'device': 'cuda'}
+        model_kwargs={'device': 'cpu'}
     )
     docs = [Document(page_content=item["text"], metadata=item.get("meta", {})) for item in external_texts]
 
