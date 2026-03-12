@@ -169,7 +169,12 @@ def run_autogen_agents(question, do_external=True):
     assistant = autogen.AssistantAgent(
         name="Knowledge_Assistant",
         llm_config=llm_config,
-        system_message=f"""Knowledge Assistant: {source_instruction} Call each tool at most ONCE. If a tool returns no useful data, do NOT retry with a similar query — instead use your own knowledge to answer. Provide explicit inline citations like [Wikipedia: Title], [arXiv: URL], or [Local Source 1]. Do NOT use 【1†source】 format. Be brief. End ONLY with 'TERMINATE'."""
+        system_message=f"""You are a Knowledge Assistant. {source_instruction}
+        RULES (strictly follow):
+        1. Call search_wiki at most ONCE and search_arxiv at most ONCE. Never repeat a tool call.
+        2. If the tool result is not about the query topic, ignore it and answer from your own knowledge.
+        3. Give a direct, brief answer with inline citations like [Wikipedia: Title] or [arXiv: URL].
+        4. Always end your final message with exactly: TERMINATE"""
     )
 
     user_proxy = autogen.UserProxyAgent(
@@ -227,7 +232,25 @@ def run_autogen_agents(question, do_external=True):
         summary_method="last_msg"
     )
 
-    final_answer = chat_res.summary.replace("TERMINATE", "").strip() if chat_res.summary else "Agent failed to respond."
+    def _safe_get_final_answer(chat_res):
+        """Safely extract final answer, falling back to chat history scan on AutoGen summary bugs."""
+        try:
+            summary = chat_res.summary or ""
+        except Exception:
+            summary = ""
+
+        if not summary:
+            # Walk chat history in reverse to find last non-empty text message
+            for msg in reversed(chat_res.chat_history or []):
+                content = msg.get("content") or ""
+                # Skip tool call / function messages
+                if content and not isinstance(content, list) and msg.get("role") != "tool":
+                    summary = content
+                    break
+
+        return summary.replace("TERMINATE", "").strip() or "Agent could not generate a response. Please try a different query."
+
+    final_answer = _safe_get_final_answer(chat_res)
     return final_answer, external_sources
 
 # -------------------------
