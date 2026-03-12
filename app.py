@@ -1,9 +1,4 @@
 # ai_knowledge_assistant_app.py
-"""
-AI Knowledge Assistant (RAG + Groq-native Summarizer/Explainer)
-- FAISS in-memory (session_state)
-- PDF upload + external fetch (arXiv + Wikipedia)
-"""
 
 import os
 import tempfile
